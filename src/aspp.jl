@@ -9,19 +9,27 @@ function ASPP(in_channels::Int, out_channels::Int=256;
     branches = Chain[]
 
     # 1×1
-    push!(branches, Chain(Conv((1,1), in_channels => out_channels; bias=false),
-                          BatchNorm(out_channels), relu))
+    push!(branches, Chain(
+        Conv((1,1), in_channels => out_channels; bias=false),
+        BatchNorm(out_channels),
+        relu
+    ))
 
     # dilated
     for r in rates
-        push!(branches, Chain(Conv((3,3), in_channels => out_channels; pad=r, dilation=r, bias=false),
-                              BatchNorm(out_channels), relu))
+        push!(branches, Chain(
+            Conv((3,3), in_channels => out_channels; pad=r, dilation=r, bias=false),
+            BatchNorm(out_channels),
+            relu
+        ))
     end
 
-    # GAP
-    push!(branches, Chain(AdaptiveMeanPool((1,1)),
-                          Conv((1,1), in_channels => out_channels; bias=false),
-                          BatchNorm(out_channels), relu))
+    # GAP branch — no BatchNorm (avoids 1×1 spatial + batch=1 problem)
+    push!(branches, Chain(
+        AdaptiveMeanPool((1,1)),
+        Conv((1,1), in_channels => out_channels; bias=false),
+        relu
+    ))
 
     project = Chain(
         Conv((1,1), out_channels * 5 => out_channels; bias=false),
