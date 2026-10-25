@@ -1,0 +1,19 @@
+name = "DeepLab"
+uuid = "8af1ee66-1bb0-4cc4-8b8b-98ac44bdf12f"
+version = "1.0.0-DEV"
+authors = ["Ciro B Rosa <ciro.rosa@alumni.usp.br>"]
+
+[deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Metalhead = "dbeba491-748d-5e0e-a39e-b530a07fa0cc"
+
+[compat]
+Flux = "0.16.14"
+Metalhead = "0.9.7"
+julia = "1.13"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
