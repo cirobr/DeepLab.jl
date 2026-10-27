@@ -9,7 +9,7 @@ DeepLab family of models for semantic segmentation.
 
 ## DeepLabV3
 
-Reference:
+### Reference
 * "Rethinking Atrous Convolution for Semantic Image Segmentation" ([arXiv](https://arxiv.org/abs/1706.05587)). Authors: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam
 
 ### Syntax
