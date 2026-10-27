@@ -4,5 +4,6 @@ import Metalhead: ResNet, DenseNet, EfficientNet
 using Test
 
 @testset "DeepLab.jl" begin
-    include("deeplab_tests.jl")
+    include("backbones_tests.jl")
+    include("deeplabv3_tests.jl")
 end
