@@ -2,7 +2,7 @@
 
 julia_version = "1.13.2"
 manifest_format = "2.1"
-project_hash = "cf0cda2cd783b623d7c49c046acbb455c34d226a"
+project_hash = "14e2b2cdfdd383d339670874b826833a1381ebf6"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -689,10 +689,10 @@ version = "1.11.0"
 
 [[deps.Metalhead]]
 deps = ["Artifacts", "BSON", "ChainRulesCore", "Flux", "Functors", "JLD2", "LazyArtifacts", "MLUtils", "NNlib", "Random", "Statistics"]
-git-tree-sha1 = "d89c5daad1d59b29796e2c89c4b3c08375072477"
+git-tree-sha1 = "90c54d992883062f1733390731b1afae30fa577d"
 registries = "General"
 uuid = "dbeba491-748d-5e0e-a39e-b530a07fa0cc"
-version = "0.9.7"
+version = "0.9.8"
 
     [deps.Metalhead.extensions]
     MetalheadCUDAExt = "CUDA"
