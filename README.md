@@ -1,4 +1,4 @@
-![alt text](./images/logo-name-tm.png)
+![alt text](https://github.com/cirobr/TinyMachines.jl/blob/main/images/logo-name-tm.png?raw=true)
 
 # DeepLab.jl
 
