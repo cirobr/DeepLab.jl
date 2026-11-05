@@ -30,12 +30,24 @@ function resnet_stride_os(os::Int)
     return stride_fn
 end
 
+
 """
     resnet50_backbone(; os::Int=16, pretrain::Bool=false)
 
-Build a ResNet-50 feature extractor with the given output stride.
+Builds a ResNet-50 feature extractor with the given output stride.
 """
 function resnet50_backbone(; os::Int=16, pretrain::Bool=false)
+    # load pretrained weights only when OS=32
+    if pretrain
+        os == 32 || @warn "Pretrained weights are only valid for OS=32; ignoring pretrain=true"
+        if os == 32
+            # Return the high-level pre-trained constructor
+            pretrained = Metalhead.backbone(ResNet(50; pretrain=true))
+            return pretrained
+        end
+    end
+
+    # else construct a new model with the requested OS
     stride_fn = resnet_stride_os(os)
 
     model = Metalhead.resnet(
@@ -47,24 +59,15 @@ function resnet50_backbone(; os::Int=16, pretrain::Bool=false)
 
     # Extract backbone (drop classifier)
     bb = model.layers[1]
-
-    # Optional: load pretrained weights only when OS=32
-    if pretrain
-        os == 32 || @warn "Pretrained weights are only valid for OS=32; ignoring pretrain=true"
-        if os == 32
-            # Load via the high-level constructor and copy (or just use Metalhead.backbone)
-            pretrained = Metalhead.backbone(ResNet(50; pretrain=true))
-            # Note: parameter copying would be needed if you want to transfer weights
-            # into the custom model. For OS≠32 this is not straightforward.
-            return pretrained
-        end
-    end
-
     return bb
 end
+
+
+# Pretrained ResNet-50 backbone (OS=32)
+bb32 = resnet50_backbone(os=32, pretrain=true)
 
 # DeepLabv3 default (OS=16)
 bb16 = resnet50_backbone(os=16)
 
-# Higher resolution (OS=8)
+# ResNet-50 higher resolution (OS=8)
 bb8  = resnet50_backbone(os=8)

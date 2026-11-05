@@ -1,4 +1,13 @@
-# ---------- ASPP (unchanged, just takes in_channels) ----------
+"""
+    ASPP: Atrous Spatial Pyramid Pooling
+
+    This module implements the ASPP module from DeepLabv3.
+    It consists of:
+    - 1×1 convolution
+    - 3×3 convolutions with different dilation rates
+    - Global average pooling branch
+    - Concatenation and projection to output channels
+"""
 struct ASPP
     branches::Vector{Chain}
     project::Chain

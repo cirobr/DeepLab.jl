@@ -2,7 +2,7 @@ module DeepLab
 
 
 export DeepLabV3
-export resnet50_backbone, bb16, bb8
+export resnet50_backbone, bb32, bb16, bb8
 
 import Flux
 import Flux: Chain, Conv, BatchNorm, AdaptiveMeanPool, Dropout, relu
