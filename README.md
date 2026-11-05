@@ -18,15 +18,18 @@ DeepLab family of models for semantic segmentation.
 DeepLabV3(ch_in::Int=3, ch_out::Int=19; backbone=ResNet(50; pretrain=false))
 ```
 
-* bb32: ImageNet-pretrained ResNet-50 backbone (output stride=32, imported from Metalhead.jl)
-* bb16: DeepLabv3 standard backbone, non-pretrained (OS=16)
-* bb8: Non-pretrained ResNet-50 backbone, higher resolution (OS=8)
+Convenience backbones:
+```
+backbone=bb32  # ImageNet-pretrained ResNet-50 backbone (output stride=32, imported from Metalhead.jl)
+backbone=bb16  # DeepLabv3 standard backbone, non-pretrained (OS=16)
+backbone=bb8   # Non-pretrained ResNet-50 backbone, higher resolution (OS=8)
+```
 
 
 
 ## Credits
-Credits for the original architectures go to the references' authors, as aforementioned.
+Credits for the original architecture go to the reference' authors, as aforementioned.
 
-Credits for the implementations in Julia/Flux go to Ciro B Rosa.
+Credits for the implementation in Julia/Flux go to Ciro B Rosa.
 * GitHub: https://github.com/cirobr
 * LinkedIn: https://www.linkedin.com/in/cirobrosa/
