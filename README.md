@@ -14,12 +14,32 @@ DeepLab family of models for semantic segmentation.
 
 ### Syntax
 
+```julia
+DeepLabV3(ch_in=3, ch_out=19;              # input/output channels
+    backbone=ResNet(50; pretrain=false),   # backbone
+    use_aux=false,                         # auxiliary head
+    aux_index=4,                           # index for aux head extraction
+    aspp_rates=(6,12,18),                  # aspp dilation rates
+)
 ```
-DeepLabV3(ch_in::Int=3, ch_out::Int=19; backbone=ResNet(50; pretrain=false))
+
+Generalized aux head loss function detection (example):
+
+```julia
+function lossfn(model, X, y)
+      if isnothing(model.aux_classifier)
+            yhat = model(X)
+            return Flux.mse(yhat, y)
+      else
+            yhat, aux = model(X, Val(:aux))
+            return Flux.mse(yhat, y) + 0.4f0 * Flux.mse(aux, y)
+      end
+end
 ```
 
 Convenience backbones:
-```
+
+```julia
 backbone=bb32  # ImageNet-pretrained ResNet-50 backbone (output stride=32, imported from Metalhead.jl)
 backbone=bb16  # DeepLabv3 standard backbone, non-pretrained (OS=16)
 backbone=bb8   # Non-pretrained ResNet-50 backbone, higher resolution (OS=8)

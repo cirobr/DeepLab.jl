@@ -2,7 +2,6 @@ x = randn(Float32, (256, 256, 3, 1))
 
 # Pakage default: ResNet-50
 model50 = DeepLabV3()   # DeepLabV3(3,19)
-x = randn(Float32, 256, 256, 3, 1)
 @test size(model50(x)) == (256, 256, 19, 1)
 
 # Paper standard: ResNet-50, modified for cummulative output stride = 16
@@ -20,3 +19,12 @@ model_dn = DeepLabV3(backbone=DenseNet(121))
 # EfficientNet-B0
 model_eff = DeepLabV3(backbone=EfficientNet(:b0)) # or :b0 - :b8
 @test size(model_eff(x)) == (256, 256, 19, 1)
+
+# Aux head
+model_aux = DeepLabV3(backbone=ResNet(50; pretrain=false), use_aux=true)
+yhat = model_aux(x)
+@test size(yhat) == (256, 256, 19, 1)
+
+yhat, aux = model_aux(x, Val(:aux))
+@test size(yhat) == (256, 256, 19, 1)
+@test size(aux) == (256, 256, 19, 1)

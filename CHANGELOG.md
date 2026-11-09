@@ -1,3 +1,3 @@
 ### v0.0.1-DEV
 * DeepLabV3 build.
-* Added auxiliary head.
+* Added auxiliary training head.
