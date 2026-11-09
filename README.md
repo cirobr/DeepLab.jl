@@ -46,9 +46,8 @@ backbone=bb8   # Non-pretrained ResNet-50 backbone, higher resolution (OS=8)
 ```
 
 
-
 ## Credits
-Credits for the original architecture go to the reference' authors, as aforementioned.
+Credits for the original architecture go to the references' authors, as aforementioned.
 
 Credits for the implementation in Julia/Flux go to Ciro B Rosa.
 * GitHub: https://github.com/cirobr
