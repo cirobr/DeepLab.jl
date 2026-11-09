@@ -1,7 +1,7 @@
 # ---------- Flexible DeepLabV3 ----------
 struct DeepLabV3
-    backbone_early          # Chain up to (and including) aux stage
-    backbone_late           # Chain after aux stage
+    backbone_head          # Chain up to (and including) aux stage
+    backbone_tail           # Chain after aux stage
     aspp::ASPP
     classifier::Conv
     aux_classifier::Union{Chain, Nothing}
@@ -12,7 +12,9 @@ end
 
 Create a DeepLabv3-style model.
 - `use_aux=true` adds an auxiliary classifier on intermediate features.
-- `aux_index` selects which layer of the backbone Chain to tap
+- `aux_index` selects which layer of th@info "metrics OK"
+
+e backbone Chain to tap
   (ResNet: 4 = after stage 3).
 """
 function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
@@ -33,12 +35,12 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
     end
 
     # Split backbone
-    backbone_early = Chain(bb[1:aux_index]...)
-    backbone_late  = Chain(bb[aux_index+1:end]...)
+    backbone_head = Chain(bb[1:aux_index]...)
+    backbone_tail = Chain(bb[aux_index+1:end]...)
 
     # Detect final channels
     dummy = randn(Float32, 64, 64, ch_in, 1)
-    feat = backbone_late(backbone_early(dummy))
+    feat = backbone_tail(backbone_head(dummy))
     in_ch = size(feat, 3)
 
     aspp = ASPP(in_ch, 256; rates=aspp_rates)
@@ -47,7 +49,7 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
     # Auxiliary head (optional)
     aux_classifier = nothing
     if use_aux
-        aux_feat = backbone_early(dummy)
+        aux_feat = backbone_head(dummy)
         aux_ch = size(aux_feat, 3)
 
         aux_classifier = Chain(
@@ -59,12 +61,12 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
         )
     end
 
-    DeepLabV3(backbone_early, backbone_late, aspp, classifier, aux_classifier)
+    DeepLabV3(backbone_head, backbone_tail, aspp, classifier, aux_classifier)
 end
 
 # Inference / single-output forward
 function (m::DeepLabV3)(x)
-    feat = m.backbone_late(m.backbone_early(x))
+    feat = m.backbone_tail(m.backbone_head(x))
     aspp_out = m.aspp(feat)
     logits = m.classifier(aspp_out)
     return Flux.upsample_bilinear(logits, size=size(x)[1:2])
@@ -74,8 +76,8 @@ end
 function (m::DeepLabV3)(x, ::Val{:aux})
     isnothing(m.aux_classifier) && error("Model was constructed without an auxiliary head (use_aux=false)")
 
-    aux_feat = m.backbone_early(x)
-    feat     = m.backbone_late(aux_feat)
+    aux_feat = m.backbone_head(x)
+    feat     = m.backbone_tail(aux_feat)
 
     # Main head
     aspp_out = m.aspp(feat)
