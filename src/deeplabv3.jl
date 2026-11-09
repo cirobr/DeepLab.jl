@@ -1,10 +1,10 @@
 # ---------- Flexible DeepLabV3 ----------
 struct DeepLabV3
-    backbone          # full backbone Chain
+    backbone_early          # Chain up to (and including) aux stage
+    backbone_late           # Chain after aux stage
     aspp::ASPP
     classifier::Conv
-    aux_classifier::Union{Chain, Nothing}   # optional
-    aux_index::Int                          # which stage to attach aux (default 4 = after stage 3)
+    aux_classifier::Union{Chain, Nothing}
 end
 
 """
@@ -13,8 +13,7 @@ end
 Create a DeepLabv3-style model.
 - `use_aux=true` adds an auxiliary classifier on intermediate features.
 - `aux_index` selects which layer of the backbone Chain to tap
-  (ResNet: 4 = after stage 3, which is the usual choice).
-- `aspp_rates` controls the dilation rates of the ASPP module.
+  (ResNet: 4 = after stage 3).
 """
 function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
                    backbone=ResNet(50; pretrain=false),
@@ -33,9 +32,13 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
         end
     end
 
+    # Split backbone
+    backbone_early = Chain(bb[1:aux_index]...)
+    backbone_late  = Chain(bb[aux_index+1:end]...)
+
     # Detect final channels
     dummy = randn(Float32, 64, 64, ch_in, 1)
-    feat = bb(dummy)
+    feat = backbone_late(backbone_early(dummy))
     in_ch = size(feat, 3)
 
     aspp = ASPP(in_ch, 256; rates=aspp_rates)
@@ -44,12 +47,8 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
     # Auxiliary head (optional)
     aux_classifier = nothing
     if use_aux
-        # Run up to aux_index to discover intermediate channels
-        x = dummy
-        for i in 1:aux_index
-            x = bb[i](x)
-        end
-        aux_ch = size(x, 3)
+        aux_feat = backbone_early(dummy)
+        aux_ch = size(aux_feat, 3)
 
         aux_classifier = Chain(
             Conv((3,3), aux_ch => 256; pad=1, bias=false),
@@ -60,33 +59,23 @@ function DeepLabV3(ch_in::Int=3, ch_out::Int=19;
         )
     end
 
-    DeepLabV3(bb, aspp, classifier, aux_classifier, aux_index)
+    DeepLabV3(backbone_early, backbone_late, aspp, classifier, aux_classifier)
 end
 
-# Inference / single-output forward (always returns main logits)
+# Inference / single-output forward
 function (m::DeepLabV3)(x)
-    feat = m.backbone(x)
+    feat = m.backbone_late(m.backbone_early(x))
     aspp_out = m.aspp(feat)
     logits = m.classifier(aspp_out)
     return Flux.upsample_bilinear(logits, size=size(x)[1:2])
 end
 
-# Training forward: returns (main_logits, aux_logits) when aux is present
+# Training forward: returns (main_logits, aux_logits)
 function (m::DeepLabV3)(x, ::Val{:aux})
     isnothing(m.aux_classifier) && error("Model was constructed without an auxiliary head (use_aux=false)")
 
-    # Run backbone up to aux_index
-    h = x
-    for i in 1:m.aux_index
-        h = m.backbone[i](h)
-    end
-    aux_feat = h
-
-    # Continue to the end for the main path
-    for i in (m.aux_index+1):length(m.backbone)
-        h = m.backbone[i](h)
-    end
-    feat = h
+    aux_feat = m.backbone_early(x)
+    feat     = m.backbone_late(aux_feat)
 
     # Main head
     aspp_out = m.aspp(feat)
