@@ -1,4 +1,3 @@
-
 """
     resnet_stride_os(os::Int)
 

@@ -13,6 +13,16 @@ struct ASPP
     project::Chain
 end
 
+
+"""
+    ASPP(in_channels, out_channels=256; rates=(6,12,18))
+
+Create an ASPP module.
+`rates` can be adjusted according to the backbone output stride:
+- OS=32 → (2, 4, 6) or (3, 6, 9)
+- OS=16 → (6, 12, 18)   (paper default)
+- OS=8  → (12, 24, 36)
+"""
 function ASPP(in_channels::Int, out_channels::Int=256;
               rates::NTuple{3,Int}=(6, 12, 18))
     branches = Chain[]
